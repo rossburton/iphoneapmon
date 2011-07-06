@@ -33,7 +33,9 @@ avahi_daemon = dbus.Interface(bus.get_object(avahi.DBUS_NAME,
 resolvers = {}
 
 def on_resolved(interface, protocol, name, stype, domain, host, aprotocol, address, port, txt, flags):
+    # 1-5 (no signal is tech=N/A)
     strength = None
+    # N/A, 3G, 3_75G
     technology = None
     for l in txt:
         (k,v) = str(l).split("=", 1)
