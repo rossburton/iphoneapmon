@@ -35,7 +35,7 @@ resolvers = {}
 def on_resolved(interface, protocol, name, stype, domain, host, aprotocol, address, port, txt, flags):
     # 1-5 (no signal is tech=N/A)
     strength = None
-    # N/A, 3G, 3_75G
+    # N/A (no signal), 3G (UMTS), 3_75G (HSPA)
     technology = None
     for l in txt:
         (k,v) = str(l).split("=", 1)
