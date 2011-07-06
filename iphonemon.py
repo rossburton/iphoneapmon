@@ -29,6 +29,9 @@ avahi_daemon = dbus.Interface(bus.get_object(avahi.DBUS_NAME,
                                              avahi.DBUS_PATH_SERVER),
                               avahi.DBUS_INTERFACE_SERVER)
 
+# Hash of service names (i.e. "Ross Burton's iPhone" to resolver objects
+resolvers = {}
+
 def on_resolved(interface, protocol, name, stype, domain, host, aprotocol, address, port, txt, flags):
     strength = None
     technology = None
@@ -50,12 +53,17 @@ def on_new_service(interface, protocol, name, stype, domain, flags):
                                     avahi.PROTO_UNSPEC, dbus.UInt32(0))
     resolver = dbus.Interface(bus.get_object(avahi.DBUS_NAME, path),
                               avahi.DBUS_INTERFACE_SERVICE_RESOLVER)
+
     resolver.connect_to_signal("Found", on_resolved, byte_arrays=True)
     resolver.connect_to_signal("Failure", on_error)
 
+    resolvers[name] = resolver
+
 def on_remove_service(interface, protocol, name, type, domain, flags):
     print "Lost %s" % name
-    # TODO: kill the resolver
+
+    resolver = resolvers.pop(name)
+    resolver.Free()
 
 def search():
     browser = dbus.Interface(bus.get_object(avahi.DBUS_NAME,
