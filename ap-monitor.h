@@ -51,6 +51,8 @@ GType ap_monitor_get_type (void) G_GNUC_CONST;
 
 ApMonitor *ap_monitor_new (void);
 
+const char * ap_monitor_tech_to_string (ApMonitorTechnology tech);
+
 G_END_DECLS
 
 #endif /* __AP_MONITOR_H__ */

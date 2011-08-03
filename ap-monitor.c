@@ -55,7 +55,7 @@ on_found (GaServiceResolver *resolver,
     tech = ApMonitorTechUnknown;
   }
 
-  g_debug ("Signal: %d%% (%d)", strength, tech);
+  g_debug ("Signal: %d%% %s", strength, ap_monitor_tech_to_string (tech));
 }
 
 static void
@@ -144,4 +144,24 @@ ApMonitor *
 ap_monitor_new (void)
 {
   return g_object_new (AP_TYPE_MONITOR, NULL);
+}
+
+const char *
+ap_monitor_tech_to_string (ApMonitorTechnology tech)
+{
+  switch (tech) {
+  case ApMonitorTechUnknown:
+    return "Unknown";
+  case ApMonitorTechNone:
+    return "None";
+  case ApMonitorTechUMTS:
+    return "UMTS (3G)";
+  case ApMonitorTechHSDPA:
+    return "HSDPA (3.5G)";
+  case ApMonitorTechHSPA:
+    return "HSPA (3.75G)";
+  }
+
+  g_warning ("Unhandled technology %d", tech);
+  return "unknown";
 }
