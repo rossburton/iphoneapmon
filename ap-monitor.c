@@ -4,6 +4,7 @@
 #include <avahi-gobject/ga-service-resolver.h>
 
 #include "ap-monitor.h"
+#include "marshals.h"
 
 struct _ApMonitorPrivate {
   /* Avahi client */
@@ -15,12 +16,15 @@ struct _ApMonitorPrivate {
 };
 
 #define GET_PRIVATE(obj) (G_TYPE_INSTANCE_GET_PRIVATE ((obj), AP_TYPE_MONITOR, ApMonitorPrivate))
+
 G_DEFINE_TYPE (ApMonitor, ap_monitor, G_TYPE_OBJECT);
-/*
-  interface, protocol,
-                              name, type,
-                              domain, host_name, a, port, hash, flags);
-*/
+
+enum {
+  UPDATE,
+  NUM_SIGS
+};
+
+static guint signals[NUM_SIGS] = {0,};
 
 static void
 on_found (GaServiceResolver *resolver,
@@ -55,7 +59,7 @@ on_found (GaServiceResolver *resolver,
     tech = ApMonitorTechUnknown;
   }
 
-  g_debug ("Signal: %d%% %s", strength, ap_monitor_tech_to_string (tech));
+  g_signal_emit (self, signals[UPDATE], 0, strength, tech);
 }
 
 static void
@@ -118,6 +122,14 @@ ap_monitor_class_init (ApMonitorClass *klass)
     GObjectClass *o_class = (GObjectClass *)klass;
 
     g_type_class_add_private (klass, sizeof (ApMonitorPrivate));
+
+    signals[UPDATE] = g_signal_new ("update",
+                                    AP_TYPE_MONITOR,
+                                    G_SIGNAL_RUN_FIRST,
+                                    0, NULL, NULL,
+                                    ap_marshal_VOID__INT_INT,
+                                    G_TYPE_NONE,
+                                    2, G_TYPE_INT, G_TYPE_INT);
 }
 
 static void
