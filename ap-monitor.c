@@ -42,7 +42,10 @@ on_found (GaServiceResolver *resolver,
   g_debug ("resolved %s", name);
 
   ss = g_hash_table_lookup (txt, "ss");
-  strength = (int)(*ss) / 5.0 * 100;
+  if (ss)
+    strength = (int)(*ss) / 5.0 * 100;
+  else
+    strength = 0;
 
   di = g_hash_table_lookup (txt, "di");
   if (g_str_equal (di, "N/A")) {
