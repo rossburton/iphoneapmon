@@ -5,7 +5,7 @@ test: test.c libapmonitor.so
 
 
 libapmonitor.so: ap-monitor.c ap-monitor.h marshals.c marshals.h
-	$(LINK.c) -o $@ $^ -g -shared -fPIC `pkg-config --cflags --libs gobject-2.0 avahi-gobject`
+	$(LINK.c) -o $@ $^ -g -shared -fPIC `pkg-config --cflags --libs gobject-2.0 avahi-client avahi-glib`
 
 %.c: %.list
 	glib-genmarshal --prefix=ap_marshal --internal --body $^ > $@

@@ -1,17 +1,19 @@
 #include <string.h>
-#include <avahi-gobject/ga-client.h>
-#include <avahi-gobject/ga-service-browser.h>
-#include <avahi-gobject/ga-service-resolver.h>
+#include <avahi-client/client.h>
+#include <avahi-client/lookup.h>
+#include <avahi-glib/glib-watch.h>
 
 #include "ap-monitor.h"
 #include "marshals.h"
 
 struct _ApMonitorPrivate {
+  /* Avahi <-> GLib adaptors */
+  AvahiGLibPoll *poll;
   /* Avahi client */
-  GaClient *client;
+  AvahiClient *client;
   /* Service browser */
-  GaServiceBrowser *browser;
-  /* Hash of service name to GaServiceResolver instances */
+  AvahiServiceBrowser *browser;
+  /* Hash of service name to ServiceResolver instances */
   GHashTable *resolvers;
 };
 
@@ -27,94 +29,112 @@ enum {
 static guint signals[NUM_SIGS] = {0,};
 
 static void
-on_found (GaServiceResolver *resolver,
-          AvahiIfIndex interface, AvahiProtocol protocol,
-          const char *name, const char *type, const char *domain,
-          const char *host_name, const AvahiAddress * a,
-          uint16_t port, GHashTable *txt, AvahiLookupResultFlags flags,
-          gpointer user_data)
+on_resolve_callback(AvahiServiceResolver *r,
+                    AvahiIfIndex interface, AvahiProtocol protocol,
+                    AvahiResolverEvent event,
+                    const char *name, const char *type,
+                    const char *domain, const char *host_name,
+                    const AvahiAddress *address,
+                    uint16_t port,
+                    AvahiStringList *txt,
+                    AvahiLookupResultFlags flags,
+                    void* userdata)
 {
-  ApMonitor *self = AP_MONITOR (user_data);
-  const char *ss, *di;
-  int strength;
-  ApMonitorTechnology tech;
+  ApMonitor *self = AP_MONITOR (userdata);
+  ApMonitorPrivate *priv = self->priv;
 
-  g_debug ("resolved %s", name);
-
-  ss = g_hash_table_lookup (txt, "ss");
-  if (ss)
-    strength = (int)(*ss) / 5.0 * 100;
-  else
-    strength = 0;
-
-  di = g_hash_table_lookup (txt, "di");
-  if (g_str_equal (di, "N/A")) {
-    tech = ApMonitorTechNone;
-    strength = 0;
-  } else if (g_str_equal (di, "3G")) {
-    tech = ApMonitorTechUMTS;
-  } else if (g_str_equal (di, "3_5G")) {
-    tech = ApMonitorTechHSDPA;
-  } else if (g_str_equal (di, "3_75G")) {
-    tech = ApMonitorTechHSPA;
-  } else {
-    g_message ("Unknown di '%s'", di);
-    tech = ApMonitorTechUnknown;
-  }
-
-  g_signal_emit (self, signals[UPDATE], 0, strength, tech);
-}
-
-static void
-on_new_service (GaServiceBrowser *browser,
-                AvahiIfIndex interface, AvahiProtocol protocol,
-                const char *name, const char *type, const char *domain,
-                AvahiLookupResultFlags flags, gpointer user_data)
-{
-  ApMonitor *self = AP_MONITOR (user_data);
-  GaServiceResolver *resolver;
-  GError *error = NULL;
-
-  g_debug ("found %s", name);
-
-  resolver = ga_service_resolver_new (interface, protocol,
-                                      name, type, domain,
-                                      /* TODO: reuse or use ANY? */ protocol,
-                                      GA_LOOKUP_NO_FLAGS);
-
-  g_signal_connect (resolver, "found", G_CALLBACK (on_found), self);
-
-  if (!ga_service_resolver_attach (resolver, self->priv->client, &error)) {
-    g_message ("Cannot start resolver: %s", error->message);
-    g_error_free (error);
-  }
-
-  /* TODO store in the hash */
-}
-
-static void
-on_client_state_changed (GaClient *client, GaClientState state, gpointer user_data)
-{
-  ApMonitor *self = AP_MONITOR (user_data);
-
-  switch (state) {
-  case GA_CLIENT_STATE_S_RUNNING:
+  switch (event) {
+  case AVAHI_RESOLVER_FOUND:
     {
-      self->priv->browser = ga_service_browser_new ("_link411._udp");
+      AvahiStringList *l;
+      char *value;
+      int strength;
+      ApMonitorTechnology tech;
 
-      g_signal_connect (self->priv->browser, "new-service", G_CALLBACK (on_new_service), self);
+      g_debug ("resolved %s", name);
 
-      ga_service_browser_attach (self->priv->browser, self->priv->client, /* TODO error */NULL);
+      l = avahi_string_list_find (txt, "ss");
+      avahi_string_list_get_pair (l, NULL, &value, NULL);
+      if (value)
+        strength = (int)(value[0]) / 5.0 * 100;
+      else
+        strength = 0;
+      avahi_free (value);
+
+      l = avahi_string_list_find (txt, "di");
+      avahi_string_list_get_pair (l, NULL, &value, NULL);
+      if (g_str_equal (value, "N/A")) {
+        tech = ApMonitorTechNone;
+        strength = 0;
+      } else if (g_str_equal (value, "3G")) {
+        tech = ApMonitorTechUMTS;
+      } else if (g_str_equal (value, "3_5G")) {
+        tech = ApMonitorTechHSDPA;
+      } else if (g_str_equal (value, "3_75G")) {
+        tech = ApMonitorTechHSPA;
+      } else {
+        g_message ("Unknown di '%s'", value);
+        tech = ApMonitorTechUnknown;
+      }
+      avahi_free (value);
+
+      g_signal_emit (self, signals[UPDATE], 0, strength, tech);
     }
     break;
-  case GA_CLIENT_STATE_S_REGISTERING:
-  case GA_CLIENT_STATE_NOT_STARTED:
-  case GA_CLIENT_STATE_CONNECTING:
-    /* Silently do nothing */
-  case GA_CLIENT_STATE_S_COLLISION:
-  case GA_CLIENT_STATE_FAILURE:
-    g_message ("Cannot connect to Avahi: state %d", state);
+  }
+}
+
+
+static void
+on_browse_callback (AvahiServiceBrowser *b,
+                    AvahiIfIndex interface, AvahiProtocol protocol,
+                    AvahiBrowserEvent event,
+                    const char *name,
+                    const char *type,
+                    const char *domain,
+                    AvahiLookupResultFlags flags,
+                    void* userdata)
+{
+  ApMonitor *self = AP_MONITOR (userdata);
+  ApMonitorPrivate *priv = self->priv;
+
+  switch (event) {
+  case AVAHI_BROWSER_NEW:
+    g_debug ("found %s", name);
+
+    avahi_service_resolver_new (priv->client,
+                                interface, protocol, name, type, domain,
+                                AVAHI_PROTO_UNSPEC, 0, on_resolve_callback, self);
+    /* TODO: error handling */
     break;
+  }
+}
+
+static void
+on_client_state_changed (AvahiClient *client, AvahiClientState state, void *user_data)
+{
+  ApMonitor *self = AP_MONITOR (user_data);
+  ApMonitorPrivate *priv = self->priv;
+
+  switch (state) {
+  case AVAHI_CLIENT_S_RUNNING:
+    {
+      priv->browser = avahi_service_browser_new (client,
+                                                 AVAHI_IF_UNSPEC,
+                                                 AVAHI_PROTO_UNSPEC,
+                                                 "_link411._udp",
+                                                 NULL, 0,
+                                                 on_browse_callback, self);
+      /* TODO: error handling */
+    }
+    break;
+  case AVAHI_CLIENT_S_REGISTERING:
+  case AVAHI_CLIENT_CONNECTING:
+    /* Silently do nothing */
+    break;
+  case AVAHI_CLIENT_S_COLLISION:
+  case AVAHI_CLIENT_FAILURE:
+    g_message ("Cannot connect to Avahi: state %d", state);
     break;
   }
 }
@@ -139,20 +159,19 @@ static void
 ap_monitor_init (ApMonitor *self)
 {
   ApMonitorPrivate *priv;
-  GError *error = NULL;
+  int error;
 
   priv = self->priv = GET_PRIVATE (self);
 
-  priv->client = ga_client_new (GA_CLIENT_FLAG_NO_FAIL);
+  priv->poll = avahi_glib_poll_new (NULL, G_PRIORITY_DEFAULT);
+  /* TODO free this in finalize */
 
-  g_signal_connect (priv->client, "state-changed",
-                    G_CALLBACK (on_client_state_changed), self);
-
-  /* TODO Do this in initable for error handling */
-  if (!ga_client_start(priv->client, &error)) {
-    g_message ("Cannot start Avahi: %s", error->message);
-    g_error_free (error);
-  }
+  priv->client = avahi_client_new (avahi_glib_poll_get (priv->poll),
+                                   AVAHI_CLIENT_NO_FAIL,
+                                   on_client_state_changed,
+                                   self,
+                                   &error);
+  /* TODO: error checking, use GInitiable */
 }
 
 ApMonitor *
