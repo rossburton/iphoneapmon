@@ -1,0 +1,5 @@
+*.gir
+*.typelib
+*.so
+marshals.[ch]
+test
