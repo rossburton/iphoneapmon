@@ -42,6 +42,7 @@ G_DEFINE_TYPE (ApMonitor, ap_monitor, G_TYPE_OBJECT);
 enum {
   FOUND,
   UPDATE,
+  LOST,
   NUM_SIGS
 };
 
@@ -128,6 +129,15 @@ on_browse_callback (AvahiServiceBrowser *b,
 
     /* TODO: error handling */
     break;
+
+  case AVAHI_BROWSER_REMOVE:
+
+    /* Emit the lost signal */
+    g_signal_emit (self, signals[LOST], 0, name);
+
+    /* TODO: clean up */
+
+    break;
   }
 }
 
@@ -182,6 +192,14 @@ ap_monitor_class_init (ApMonitorClass *klass)
                                     ap_marshal_VOID__STRING_INT_INT,
                                     G_TYPE_NONE,
                                     3, G_TYPE_STRING, G_TYPE_INT, G_TYPE_INT);
+
+    signals[LOST] = g_signal_new ("lost",
+                                  AP_TYPE_MONITOR,
+                                  G_SIGNAL_RUN_FIRST,
+                                  0, NULL, NULL,
+                                  g_cclosure_marshal_VOID__STRING,
+                                  G_TYPE_NONE,
+                                  1, G_TYPE_STRING);
 }
 
 static void
