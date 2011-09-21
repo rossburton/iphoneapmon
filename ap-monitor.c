@@ -69,8 +69,6 @@ on_resolve_callback(AvahiServiceResolver *r,
       int strength;
       ApMonitorTechnology tech;
 
-      g_debug ("resolved %s", name);
-
       l = avahi_string_list_find (txt, "ss");
       avahi_string_list_get_pair (l, NULL, &value, NULL);
       if (value)
@@ -118,8 +116,6 @@ on_browse_callback (AvahiServiceBrowser *b,
 
   switch (event) {
   case AVAHI_BROWSER_NEW:
-    g_debug ("found %s", name);
-
     avahi_service_resolver_new (priv->client,
                                 interface, protocol, name, type, domain,
                                 AVAHI_PROTO_UNSPEC, 0, on_resolve_callback, self);
