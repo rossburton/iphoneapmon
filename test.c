@@ -17,6 +17,7 @@
  */
 
 #include "ap-monitor.h"
+#include <locale.h>
 
 static void
 on_update (ApMonitor *monitor, const char *name, int strength, int tech)
@@ -30,6 +31,9 @@ main (int argc, char **argv)
 {
   ApMonitor *apmon;
   GMainLoop *loop;
+
+  /* Setup the locale so that UTF-8 works */
+  setlocale (LC_ALL, "");
 
   g_type_init ();
 
