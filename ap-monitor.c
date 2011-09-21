@@ -31,7 +31,8 @@ struct _ApMonitorPrivate {
   AvahiClient *client;
   /* Service browser */
   AvahiServiceBrowser *browser;
-  /* Hash of service name to ServiceResolver instances */
+  /* Hash of service name to ServiceResolver instances. The hash table destroys
+     on remove. */
   GHashTable *resolvers;
 };
 
@@ -118,24 +119,27 @@ on_browse_callback (AvahiServiceBrowser *b,
 
   switch (event) {
   case AVAHI_BROWSER_NEW:
+    {
+      AvahiServiceResolver *resolver;
 
-    /* Emit the found signal */
-    g_signal_emit (self, signals[FOUND], 0, name);
+      /* Emit the found signal */
+      g_signal_emit (self, signals[FOUND], 0, name);
 
-    /* Then resolve the service to get the strength information */
-    avahi_service_resolver_new (priv->client,
-                                interface, protocol, name, type, domain,
-                                AVAHI_PROTO_UNSPEC, 0, on_resolve_callback, self);
+      /* Then resolve the service to get the strength information */
+      resolver = avahi_service_resolver_new (priv->client,
+                                             interface, protocol, name, type, domain,
+                                             AVAHI_PROTO_UNSPEC, 0, on_resolve_callback, self);
+      /* TODO: error handling */
 
-    /* TODO: error handling */
+      g_hash_table_insert (priv->resolvers, g_strdup (name), resolver);
+    }
     break;
-
   case AVAHI_BROWSER_REMOVE:
 
     /* Emit the lost signal */
     g_signal_emit (self, signals[LOST], 0, name);
 
-    /* TODO: clean up */
+    g_hash_table_remove (priv->resolvers, name);
 
     break;
   }
@@ -219,6 +223,10 @@ ap_monitor_init (ApMonitor *self)
                                    self,
                                    &error);
   /* TODO: error checking, use GInitiable */
+
+  priv->resolvers = g_hash_table_new_full (g_str_hash, g_str_equal,
+                                           g_free,
+                                           (GDestroyNotify)avahi_service_browser_free);
 }
 
 ApMonitor *
