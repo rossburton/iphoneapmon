@@ -20,6 +20,12 @@
 #include <locale.h>
 
 static void
+on_found (ApMonitor *monitor, const char *name)
+{
+  g_print ("Found AP '%s'\n", name);
+}
+
+static void
 on_update (ApMonitor *monitor, const char *name, int strength, int tech)
 {
   g_print ("AP '%s' strengh %d%% %s\n",
@@ -40,6 +46,7 @@ main (int argc, char **argv)
   loop = g_main_loop_new (NULL, TRUE);
 
   apmon = ap_monitor_new ();
+  g_signal_connect (apmon, "found", G_CALLBACK (on_found), NULL);
   g_signal_connect (apmon, "update", G_CALLBACK (on_update), NULL);
 
   g_main_loop_run (loop);;

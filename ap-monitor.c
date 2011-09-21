@@ -40,6 +40,7 @@ struct _ApMonitorPrivate {
 G_DEFINE_TYPE (ApMonitor, ap_monitor, G_TYPE_OBJECT);
 
 enum {
+  FOUND,
   UPDATE,
   NUM_SIGS
 };
@@ -116,9 +117,15 @@ on_browse_callback (AvahiServiceBrowser *b,
 
   switch (event) {
   case AVAHI_BROWSER_NEW:
+
+    /* Emit the found signal */
+    g_signal_emit (self, signals[FOUND], 0, name);
+
+    /* Then resolve the service to get the strength information */
     avahi_service_resolver_new (priv->client,
                                 interface, protocol, name, type, domain,
                                 AVAHI_PROTO_UNSPEC, 0, on_resolve_callback, self);
+
     /* TODO: error handling */
     break;
   }
@@ -159,6 +166,14 @@ ap_monitor_class_init (ApMonitorClass *klass)
     GObjectClass *o_class = (GObjectClass *)klass;
 
     g_type_class_add_private (klass, sizeof (ApMonitorPrivate));
+
+    signals[FOUND] = g_signal_new ("found",
+                                   AP_TYPE_MONITOR,
+                                   G_SIGNAL_RUN_FIRST,
+                                   0, NULL, NULL,
+                                   g_cclosure_marshal_VOID__STRING,
+                                   G_TYPE_NONE,
+                                   1, G_TYPE_STRING);
 
     signals[UPDATE] = g_signal_new ("update",
                                     AP_TYPE_MONITOR,
