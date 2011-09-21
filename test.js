@@ -22,7 +22,7 @@ const Ap = imports.gi.Ap;
 const Mainloop = imports.mainloop;
 
 let ap = new Ap.Monitor();
-ap.connect("update", function (monitor, strength, tech) {
-    print ("Got a " + Ap.Monitor.tech_to_string (tech) + " connection at " + strength + "%");
+ap.connect("update", function (monitor, name, strength, tech) {
+    print ("Got a " + Ap.Monitor.tech_to_string (tech) + " connection at " + strength + "% on " + name);
 });
 Mainloop.run('ap');

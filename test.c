@@ -19,9 +19,10 @@
 #include "ap-monitor.h"
 
 static void
-on_update (ApMonitor *monitor, int strength, int tech)
+on_update (ApMonitor *monitor, const char *name, int strength, int tech)
 {
-  g_print ("Strengh %d%% %s\n", strength, ap_monitor_tech_to_string (tech));
+  g_print ("AP '%s' strengh %d%% %s\n",
+           name, strength, ap_monitor_tech_to_string (tech));
 }
 
 int

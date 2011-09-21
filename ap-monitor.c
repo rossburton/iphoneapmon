@@ -94,7 +94,7 @@ on_resolve_callback(AvahiServiceResolver *r,
       }
       avahi_free (value);
 
-      g_signal_emit (self, signals[UPDATE], 0, strength, tech);
+      g_signal_emit (self, signals[UPDATE], 0, name, strength, tech);
     }
     break;
   }
@@ -164,9 +164,9 @@ ap_monitor_class_init (ApMonitorClass *klass)
                                     AP_TYPE_MONITOR,
                                     G_SIGNAL_RUN_FIRST,
                                     0, NULL, NULL,
-                                    ap_marshal_VOID__INT_INT,
+                                    ap_marshal_VOID__STRING_INT_INT,
                                     G_TYPE_NONE,
-                                    2, G_TYPE_INT, G_TYPE_INT);
+                                    3, G_TYPE_STRING, G_TYPE_INT, G_TYPE_INT);
 }
 
 static void
