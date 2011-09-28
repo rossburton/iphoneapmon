@@ -226,7 +226,7 @@ ap_monitor_init (ApMonitor *self)
 
   priv->resolvers = g_hash_table_new_full (g_str_hash, g_str_equal,
                                            g_free,
-                                           (GDestroyNotify)avahi_service_browser_free);
+                                           (GDestroyNotify)avahi_service_resolver_free);
 }
 
 ApMonitor *
