@@ -1,0 +1,7 @@
+{
+    "shell-version": ["3.2"],
+    "uuid": "iphonemon@ross.burton.intel.com",
+    "name": "iPhone Connection Monitor",
+    "description": "Show iPhone connection state",
+    "url": "https://github.com/rossburton/iphoneapmon"
+}
