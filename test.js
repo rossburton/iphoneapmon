@@ -23,12 +23,12 @@ const Mainloop = imports.mainloop;
 
 let ap = new Ap.Monitor();
 
-ap.connect("found", function (monitor, name, strength, tech) {
+ap.connect("found", function (monitor, name) {
     print ("Found an AP called " + name);
 });
 
 
-ap.connect("lost", function (monitor, name, strength, tech) {
+ap.connect("lost", function (monitor, name) {
     print ("Lost an AP called " + name);
 });
 
