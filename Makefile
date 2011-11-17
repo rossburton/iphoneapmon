@@ -22,6 +22,6 @@ Ap-1.0.gir: libapmonitor.so
 PREFIX=${HOME}/Programming/MeeGo/netbook/install/
 
 install: Ap-1.0.typelib
-	install -m755 libapmonitor.so ${PREFIX}/lib64
+	install -m755 libapmonitor.so ${PREFIX}/lib
 	install -m644 Ap-1.0.gir ${PREFIX}/share/gir-1.0/
-	install -m644 Ap-1.0.typelib ${PREFIX}/lib64/girepository-1.0/
+	install -m644 Ap-1.0.typelib ${PREFIX}/lib/girepository-1.0/
