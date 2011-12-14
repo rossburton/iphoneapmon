@@ -22,7 +22,7 @@ Indicator.prototype = {
     __proto__: PanelMenu.SystemStatusButton.prototype,
 
     _init: function() {
-        PanelMenu.SystemStatusButton.prototype._init.call(this, 'network-idle', "iphoneapmon");
+        PanelMenu.SystemStatusButton.prototype._init.call(this, 'network-idle', null);
 
         this.actor.hide();
 
@@ -30,15 +30,20 @@ Indicator.prototype = {
         this.ap.connect("found", Lang.bind(this, this._on_found));
         this.ap.connect("update", Lang.bind(this, this._on_update));
         this.ap.connect("lost", Lang.bind(this, this._on_lost));
+
+        this._item = new PopupMenu.PopupMenuItem("foo", { reactive: false });
+        this.menu.addMenuItem(this._item);
     },
 
     _on_found: function (monitor, name) {
-        this.setTooltip(name);
+        this._item.label.text = name;
         this.actor.show();
     },
 
     _on_update: function (monitor, name, strength, tech) {
-        this.setTooltip("" + Ap.Monitor.tech_to_string (tech) + " connection at " + strength + "% on " + name);
+        this._item.label.text = "" +
+            Ap.Monitor.tech_to_string (tech) +
+            " connection at " + strength + "% on " + name;
         if (strength == 0) {
             this.setIcon("network-wireless-signal-none");
         } else if (strength <= 20) {
