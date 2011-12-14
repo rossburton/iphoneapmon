@@ -26,10 +26,10 @@ Indicator.prototype = {
 
         this.actor.hide();
 
-        this.ap = new Ap.Monitor()
-        this.ap.connect("found", Lang.bind(this, this._on_found));
-        this.ap.connect("update", Lang.bind(this, this._on_update));
-        this.ap.connect("lost", Lang.bind(this, this._on_lost));
+        this._ap = new Ap.Monitor()
+        this._ap.connect("found", Lang.bind(this, this._on_found));
+        this._ap.connect("update", Lang.bind(this, this._on_update));
+        this._ap.connect("lost", Lang.bind(this, this._on_lost));
 
         this._item = new PopupMenu.PopupMenuItem("foo", { reactive: false });
         this.menu.addMenuItem(this._item);
