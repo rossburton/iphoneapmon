@@ -41,9 +41,8 @@ Indicator.prototype = {
     },
 
     _on_update: function (monitor, name, strength, tech) {
-        this._item.label.text = "" +
-            Ap.Monitor.tech_to_string (tech) +
-            " connection at " + strength + "% on " + name;
+        this._item.label.text = name + " over " + Ap.Monitor.tech_to_string (tech);
+
         if (strength == 0) {
             this.setIcon("network-wireless-signal-none");
         } else if (strength <= 20) {
