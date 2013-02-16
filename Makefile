@@ -14,7 +14,7 @@ libapmonitor.so: ap-monitor.c ap-monitor.h marshals.c marshals.h
 	glib-genmarshal --prefix=ap_marshal --internal --header $^ > $@
 
 Ap-1.0.gir: libapmonitor.so
-	g-ir-scanner ap-monitor.c ap-monitor.h -n Ap --nsversion=1.0 --library apmonitor --pkg=gobject-2.0,avahi-gobject -i GObject-2.0 -o $@
+	g-ir-scanner ap-monitor.c ap-monitor.h -n Ap --nsversion=1.0 --library apmonitor --pkg=gobject-2.0,avahi-gobject -i GObject-2.0 -L `pwd` -o $@
 
 %.typelib: %.gir
 	g-ir-compiler $^ -o $@
