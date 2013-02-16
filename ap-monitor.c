@@ -22,7 +22,6 @@
 #include <avahi-glib/glib-watch.h>
 
 #include "ap-monitor.h"
-#include "marshals.h"
 
 struct _ApMonitorPrivate {
   /* Avahi <-> GLib adaptors */
@@ -193,7 +192,7 @@ ap_monitor_class_init (ApMonitorClass *klass)
                                     AP_TYPE_MONITOR,
                                     G_SIGNAL_RUN_FIRST,
                                     0, NULL, NULL,
-                                    ap_marshal_VOID__STRING_INT_INT,
+                                    g_cclosure_marshal_generic,
                                     G_TYPE_NONE,
                                     3, G_TYPE_STRING, G_TYPE_INT, G_TYPE_INT);
 
