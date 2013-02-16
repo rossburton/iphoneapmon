@@ -47,8 +47,6 @@ main (int argc, char **argv)
   /* Setup the locale so that UTF-8 works */
   setlocale (LC_ALL, "");
 
-  g_type_init ();
-
   loop = g_main_loop_new (NULL, TRUE);
 
   apmon = ap_monitor_new ();
