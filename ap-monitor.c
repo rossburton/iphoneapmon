@@ -253,3 +253,59 @@ ap_monitor_tech_to_string (ApMonitorTechnology tech)
   g_warning ("Unhandled technology %d", tech);
   return "unknown";
 }
+
+/**
+ * ap_monitor_get_icon_for_tech:
+ *
+ * Returns: (transfer full) (type GThemedIcon): a new #GIcon.
+ **/
+GIcon *
+ap_monitor_get_icon_for_tech (ApMonitorTechnology tech)
+{
+  const char *name;
+
+  switch (tech) {
+  case ApMonitorTechUnknown:
+  case ApMonitorTechNone:
+    return NULL;
+  case ApMonitorTechUMTS:
+    name = "network-cellular-umts-symbolic";
+    break;
+  case ApMonitorTechHSPA:
+  case ApMonitorTechHSDPA:
+    name = "network-cellular-3g-symbolic";
+    break;
+  default:
+    g_assert_not_reached ();
+  }
+
+  return g_themed_icon_new (name);
+}
+
+/**
+ * ap_monitor_get_icon_for_signal:
+ *
+ * Returns: (transfer full) (type GThemedIcon): a new #GIcon.
+ **/
+GIcon *
+ap_monitor_get_icon_for_signal (int signal)
+{
+  const char *name;
+
+  g_return_val_if_fail (signal > 0, NULL);
+  g_return_val_if_fail (signal <= 100, NULL);
+
+  if (signal == 0) {
+    name = "network-cellular-signal-none-symbolic";
+  } else if (signal > 0 && signal <= 25) {
+    name = "network-cellular-signal-weak-symbolic";
+  } else if (signal > 25 && signal <= 50) {
+    name = "network-cellular-signal-ok-symbolic";
+  } else if (signal > 50 && signal <= 75) {
+    name = "network-cellular-signal-good-symbolic";
+  } else if (signal > 75) {
+    name = "network-cellular-signal-excellent-symbolic";
+  }
+
+  return g_themed_icon_new (name);
+}
