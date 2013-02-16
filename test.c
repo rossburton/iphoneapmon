@@ -31,11 +31,33 @@ on_lost (ApMonitor *monitor, const char *name)
   g_print ("Lost AP '%s'\n", name);
 }
 
-static void
-on_update (ApMonitor *monitor, const char *name, int strength, int tech)
+static char *
+icon_to_string (GIcon *icon)
 {
-  g_print ("AP '%s' strengh %d%% %s\n",
-           name, strength, ap_monitor_tech_to_string (tech));
+  char *s;
+
+  if (icon == NULL)
+    return g_strdup ("");
+  s = g_icon_to_string (icon);
+  g_object_unref (icon);
+
+  return s;
+}
+
+static void
+on_update (ApMonitor *monitor, const char *name, int strength, ApMonitorTechnology tech)
+{
+  char *s_icon, *t_icon;
+
+  s_icon = icon_to_string (ap_monitor_get_icon_for_signal (strength));
+  t_icon = icon_to_string (ap_monitor_get_icon_for_tech (tech));
+
+  g_print ("AP '%s'\n", name);
+  g_print ("\tstrength: %d%% (icon: %s)\n", strength, s_icon);
+  g_print ("\ttech: %s (icon: %s)\n", ap_monitor_tech_to_string (tech), t_icon);
+
+  g_free (s_icon);
+  g_free (t_icon);
 }
 
 int
