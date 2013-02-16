@@ -72,6 +72,9 @@ on_resolve_callback(AvahiServiceResolver *r,
       ApMonitorTechnology tech;
 
       l = avahi_string_list_find (txt, "ss");
+      if (l == NULL)
+        return;
+
       avahi_string_list_get_pair (l, NULL, &value, NULL);
       if (value)
         strength = (int)(value[0]) / 5.0 * 100;
@@ -80,6 +83,9 @@ on_resolve_callback(AvahiServiceResolver *r,
       avahi_free (value);
 
       l = avahi_string_list_find (txt, "di");
+      if (l == NULL)
+        return;
+
       avahi_string_list_get_pair (l, NULL, &value, NULL);
       if (g_str_equal (value, "N/A")) {
         tech = ApMonitorTechNone;
