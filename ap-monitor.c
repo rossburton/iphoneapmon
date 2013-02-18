@@ -33,11 +33,19 @@ struct _ApMonitorPrivate {
   /* Hash of service name to ServiceResolver instances. The hash table destroys
      on remove. */
   GHashTable *resolvers;
+
+  /* Whether to ignore the services running on the local machine */
+  gboolean ignore_local;
 };
 
 #define GET_PRIVATE(obj) (G_TYPE_INSTANCE_GET_PRIVATE ((obj), AP_TYPE_MONITOR, ApMonitorPrivate))
 
 G_DEFINE_TYPE (ApMonitor, ap_monitor, G_TYPE_OBJECT);
+
+enum {
+  PROP_0,
+  PROP_IGNORE_LOCAL,
+};
 
 enum {
   FOUND,
@@ -127,6 +135,9 @@ on_browse_callback (AvahiServiceBrowser *b,
     {
       AvahiServiceResolver *resolver;
 
+      if (priv->ignore_local && (flags & AVAHI_LOOKUP_RESULT_LOCAL))
+        break;
+
       /* Emit the found signal */
       g_signal_emit (self, signals[FOUND], 0, name);
 
@@ -140,6 +151,9 @@ on_browse_callback (AvahiServiceBrowser *b,
     }
     break;
   case AVAHI_BROWSER_REMOVE:
+
+    if (priv->ignore_local && (flags & AVAHI_LOOKUP_RESULT_LOCAL))
+      break;
 
     /* Emit the lost signal */
     g_signal_emit (self, signals[LOST], 0, name);
@@ -180,11 +194,54 @@ on_client_state_changed (AvahiClient *client, AvahiClientState state, void *user
 }
 
 static void
+ap_monitor_set_property (GObject      *object,
+                         guint         prop_id,
+                         const GValue *value,
+                         GParamSpec   *pspec)
+{
+  ApMonitor *self;
+
+  self = AP_MONITOR (object);
+
+  switch (prop_id)
+  {
+  case PROP_IGNORE_LOCAL:
+    self->priv->ignore_local = g_value_get_boolean (value);
+    break;
+  default:
+    G_OBJECT_WARN_INVALID_PROPERTY_ID (object, prop_id, pspec);
+  }
+}
+
+static void
+ap_monitor_get_property (GObject    *object,
+                         guint       prop_id,
+                         GValue     *value,
+                         GParamSpec *pspec)
+{
+  ApMonitor *self;
+
+  self = AP_MONITOR (object);
+
+  switch (prop_id)
+  {
+  case PROP_IGNORE_LOCAL:
+    g_value_set_boolean (value, self->priv->ignore_local);
+    break;
+  default:
+    G_OBJECT_WARN_INVALID_PROPERTY_ID (object, prop_id, pspec);
+  }
+}
+
+static void
 ap_monitor_class_init (ApMonitorClass *klass)
 {
     GObjectClass *o_class = (GObjectClass *)klass;
 
     g_type_class_add_private (klass, sizeof (ApMonitorPrivate));
+
+    o_class->get_property = ap_monitor_get_property;
+    o_class->set_property = ap_monitor_set_property;
 
     signals[FOUND] = g_signal_new ("found",
                                    AP_TYPE_MONITOR,
@@ -209,6 +266,15 @@ ap_monitor_class_init (ApMonitorClass *klass)
                                   g_cclosure_marshal_VOID__STRING,
                                   G_TYPE_NONE,
                                   1, G_TYPE_STRING);
+
+    g_object_class_install_property (o_class,
+                                     PROP_IGNORE_LOCAL,
+                                     g_param_spec_boolean ("ignore-local",
+                                                           "Ignore local",
+                                                           "Ignore APs on the local machine",
+                                                           TRUE,
+                                                           G_PARAM_READWRITE | G_PARAM_CONSTRUCT_ONLY));
+
 }
 
 static void
