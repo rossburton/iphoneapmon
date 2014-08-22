@@ -27,6 +27,7 @@ G_BEGIN_DECLS
 typedef enum {
   ApMonitorTechUnknown = -1,
   ApMonitorTechNone = 0,
+  ApMonitorTechEdge, /* Edge */
   ApMonitorTechUMTS, /* 3G */
   ApMonitorTechHSDPA, /* 3.5G */
   ApMonitorTechHSPA /* 3.75G */

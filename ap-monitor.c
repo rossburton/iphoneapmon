@@ -98,6 +98,8 @@ on_resolve_callback(AvahiServiceResolver *r,
       if (g_str_equal (value, "N/A")) {
         tech = ApMonitorTechNone;
         strength = 0;
+      } else if (g_str_equal (value, "2_5G")) {
+        tech = ApMonitorTechEdge;
       } else if (g_str_equal (value, "3G")) {
         tech = ApMonitorTechUMTS;
       } else if (g_str_equal (value, "3_5G")) {
@@ -314,6 +316,8 @@ ap_monitor_tech_to_string (ApMonitorTechnology tech)
     return "Unknown";
   case ApMonitorTechNone:
     return "None";
+  case ApMonitorTechEdge:
+    return "Edge";
   case ApMonitorTechUMTS:
     return "UMTS (3G)";
   case ApMonitorTechHSDPA:
@@ -340,6 +344,9 @@ ap_monitor_get_icon_for_tech (ApMonitorTechnology tech)
   case ApMonitorTechUnknown:
   case ApMonitorTechNone:
     return NULL;
+  case ApMonitorTechEdge:
+    name = "network-cellular-edge-symbolic";
+    break;
   case ApMonitorTechUMTS:
     name = "network-cellular-umts-symbolic";
     break;
