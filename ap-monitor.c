@@ -402,7 +402,7 @@ ap_monitor_get_icon_for_signal (guint signal)
   g_return_val_if_fail (signal <= 100, NULL);
 
   if (signal == 0) {
-    name = "network-cellular-signal-none-symbolic";
+    name = "network-cellular-acquiring-symbolic";
   } else if (signal > 0 && signal <= 25) {
     name = "network-cellular-signal-weak-symbolic";
   } else if (signal > 25 && signal <= 50) {
