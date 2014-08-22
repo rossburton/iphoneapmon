@@ -76,7 +76,7 @@ on_resolve_callback(AvahiServiceResolver *r,
     {
       AvahiStringList *l;
       char *value;
-      int strength;
+      guint strength;
       ApMonitorTechnology tech;
 
       l = avahi_string_list_find (txt, "ss");
@@ -85,7 +85,7 @@ on_resolve_callback(AvahiServiceResolver *r,
 
       avahi_string_list_get_pair (l, NULL, &value, NULL);
       if (value)
-        strength = (int)(value[0]) / 5.0 * 100;
+        strength = (guint)(value[0]) / 5.0 * 100;
       else
         strength = 0;
       avahi_free (value);
@@ -257,7 +257,7 @@ ap_monitor_class_init (ApMonitorClass *klass)
                                     0, NULL, NULL,
                                     g_cclosure_marshal_generic,
                                     G_TYPE_NONE,
-                                    3, G_TYPE_STRING, G_TYPE_INT, G_TYPE_INT);
+                                    3, G_TYPE_STRING, G_TYPE_UINT, G_TYPE_INT);
 
     signals[LOST] = g_signal_new ("lost",
                                   AP_TYPE_MONITOR,
@@ -360,11 +360,10 @@ ap_monitor_get_icon_for_tech (ApMonitorTechnology tech)
  * Returns: (transfer full) (type GThemedIcon): a new #GIcon.
  **/
 GIcon *
-ap_monitor_get_icon_for_signal (int signal)
+ap_monitor_get_icon_for_signal (guint signal)
 {
   const char *name;
 
-  g_return_val_if_fail (signal > 0, NULL);
   g_return_val_if_fail (signal <= 100, NULL);
 
   if (signal == 0) {

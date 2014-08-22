@@ -72,7 +72,7 @@ ApMonitor *ap_monitor_new (void);
 
 const char * ap_monitor_tech_to_string      (ApMonitorTechnology tech);
 GIcon *      ap_monitor_get_icon_for_tech   (ApMonitorTechnology tech);
-GIcon *      ap_monitor_get_icon_for_signal (int signal);
+GIcon *      ap_monitor_get_icon_for_signal (guint signal);
 
 G_END_DECLS
 
