@@ -13,12 +13,13 @@ Ap-1.0.gir: libapmonitor.so
 %.typelib: %.gir
 	g-ir-compiler $^ -o $@
 
-PREFIX=${HOME}/Programming/MeeGo/netbook/install/
+PREFIX=/usr
+LIBDIR=${PREFIX}/lib64/
 
 clean:
 	rm -f libapmonitor.so Ap-1.0.typelib Ap-1.0.gir
 
-install: Ap-1.0.typelib
-	install -m755 libapmonitor.so ${PREFIX}/lib
+install: Ap-1.0.typelib Ap-1.0.gir libapmonitor.so
+	install -m755 libapmonitor.so ${LIBDIR}
 	install -m644 Ap-1.0.gir ${PREFIX}/share/gir-1.0/
-	install -m644 Ap-1.0.typelib ${PREFIX}/lib/girepository-1.0/
+	install -m644 Ap-1.0.typelib ${LIBDIR}/girepository-1.0/
