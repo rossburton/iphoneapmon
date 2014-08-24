@@ -373,11 +373,11 @@ ap_monitor_get_icon_for_tech (ApMonitorTechnology tech)
     name = "network-cellular-edge-symbolic";
     break;
   case ApMonitorTechUMTS:
-    name = "network-cellular-umts-symbolic";
+    name = "network-cellular-3g-symbolic";
     break;
   case ApMonitorTechHSPA:
   case ApMonitorTechHSDPA:
-    name = "network-cellular-3g-symbolic";
+    name = "network-cellular-hspa-symbolic";
     break;
   case ApMonitorTech4G:
     name = "network-cellular-4g-symbolic";
