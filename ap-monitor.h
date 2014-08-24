@@ -30,7 +30,8 @@ typedef enum {
   ApMonitorTechEdge, /* Edge */
   ApMonitorTechUMTS, /* 3G */
   ApMonitorTechHSDPA, /* 3.5G */
-  ApMonitorTechHSPA /* 3.75G */
+  ApMonitorTechHSPA, /* 3.75G */
+  ApMonitorTech4G, /* 4G */
 } ApMonitorTechnology;
 
 #define AP_TYPE_MONITOR (ap_monitor_get_type())

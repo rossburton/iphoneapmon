@@ -106,6 +106,8 @@ on_resolve_callback(AvahiServiceResolver *r,
         tech = ApMonitorTechHSDPA;
       } else if (g_str_equal (value, "3_75G")) {
         tech = ApMonitorTechHSPA;
+      } else if (g_str_equal (value, "4G")) {
+        tech = ApMonitorTech4G;
       } else {
         g_message ("Unknown di '%s'", value);
         tech = ApMonitorTechUnknown;
@@ -324,6 +326,8 @@ ap_monitor_tech_to_string (ApMonitorTechnology tech)
     return "HSDPA (3.5G)";
   case ApMonitorTechHSPA:
     return "HSPA (3.75G)";
+  case ApMonitorTech4G:
+    return "4G";
   }
 
   g_warning ("Unhandled technology %d", tech);
@@ -353,6 +357,9 @@ ap_monitor_get_icon_for_tech (ApMonitorTechnology tech)
   case ApMonitorTechHSPA:
   case ApMonitorTechHSDPA:
     name = "network-cellular-3g-symbolic";
+    break;
+  case ApMonitorTech4G:
+    name = "network-cellular-4g-symbolic";
     break;
   default:
     g_assert_not_reached ();
