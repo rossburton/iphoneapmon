@@ -43,10 +43,10 @@ typedef enum {
    (G_TYPE_CHECK_CLASS_CAST ((klass),                                   \
                              AP_TYPE_MONITOR,                           \
                              ApMonitorClass))
-#define IS_AP_MONITOR(obj)                                              \
+#define AP_IS_MONITOR(obj)                                              \
    (G_TYPE_CHECK_INSTANCE_TYPE ((obj),                                  \
                                 AP_TYPE_MONITOR))
-#define IS_AP_MONITOR_CLASS(klass)                                      \
+#define AP_IS_MONITOR_CLASS(klass)                                      \
    (G_TYPE_CHECK_CLASS_TYPE ((klass),                                   \
                              AP_TYPE_MONITOR))
 #define AP_MONITOR_GET_CLASS(obj)                                       \

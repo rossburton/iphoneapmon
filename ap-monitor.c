@@ -23,6 +23,8 @@
 
 #include "ap-monitor.h"
 
+static GObjectClass *parent_class = NULL;
+
 struct _ApMonitorPrivate {
   /* Avahi <-> GLib adaptors */
   AvahiGLibPoll *poll;
@@ -238,12 +240,31 @@ ap_monitor_get_property (GObject    *object,
 }
 
 static void
+ap_monitor_finalize (GObject *object)
+{
+    ApMonitor *self;
+
+    g_return_if_fail (AP_IS_MONITOR (object));
+
+    self = AP_MONITOR (object);
+    g_clear_pointer (&self->priv->resolvers, g_hash_table_destroy);
+    g_clear_pointer (&self->priv->browser, avahi_service_browser_free);
+    g_clear_pointer (&self->priv->client, avahi_client_free);
+    g_clear_pointer (&self->priv->poll, avahi_glib_poll_free);
+
+    G_OBJECT_CLASS (parent_class)->finalize (object);
+}
+
+static void
 ap_monitor_class_init (ApMonitorClass *klass)
 {
     GObjectClass *o_class = (GObjectClass *)klass;
 
     g_type_class_add_private (klass, sizeof (ApMonitorPrivate));
 
+    parent_class = g_type_class_peek_parent (klass);
+
+    o_class->finalize = ap_monitor_finalize;
     o_class->get_property = ap_monitor_get_property;
     o_class->set_property = ap_monitor_set_property;
 
