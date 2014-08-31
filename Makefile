@@ -16,10 +16,19 @@ Ap-1.0.gir: libapmonitor.so
 PREFIX=/usr
 LIBDIR=${PREFIX}/lib64/
 
+SUBDIRS = shell
+
+.PHONY: subdirs $(SUBDIRS)
+
+subdirs: $(SUBDIRS)
+
+$(SUBDIRS):
+	$(MAKE) -C $@ install
+
 clean:
 	rm -f libapmonitor.so Ap-1.0.typelib Ap-1.0.gir
 
-install: Ap-1.0.typelib Ap-1.0.gir libapmonitor.so
+install: Ap-1.0.typelib Ap-1.0.gir libapmonitor.so shell
 	install -m755 libapmonitor.so ${LIBDIR}
 	install -m644 Ap-1.0.gir ${PREFIX}/share/gir-1.0/
 	install -m644 Ap-1.0.typelib ${LIBDIR}/girepository-1.0/
